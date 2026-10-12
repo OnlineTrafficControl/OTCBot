@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Prepare deployment files
         run: |
@@ -26,7 +26,7 @@ jobs:
 
           cp -r otc_bot deploy/
           cp -r bin deploy/
-          cp requirements.txt LICENSE Makefile OTC_Bot.py TODO.md deploy/
+          cp requirements.txt LICENSE Makefile deploy/
 
           find deploy -type d -name "__pycache__" \
             -prune -exec rm -rf {} +

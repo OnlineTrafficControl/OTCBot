@@ -1,5 +1,6 @@
 # IGNORED FILES #
 .env
+.coverage
 
 # IGNORED FOLDERS #
 .vscode

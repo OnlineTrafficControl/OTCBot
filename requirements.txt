@@ -3,3 +3,6 @@ dotenv==0.9.9
 jarbin_toolkit_error==1.0.0.0
 jarbin_toolkit_time==1.0.0.0
 jarbin_toolkit_log==1.0.0.0
+pytest==9.1.1
+pytest-asyncio==1.4.0
+pytest-cov==7.1.0

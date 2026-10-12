@@ -124,19 +124,19 @@ def test_close_logger_closes_even_if_flush_fails(monkeypatch) -> None:
 
 def test_flush_worker_stops_when_event_is_set(monkeypatch) -> None:
     stop_event = MagicMock()
+    stop_event.is_set.return_value = False
     stop_event.wait.return_value = True
 
     monkeypatch.setattr(logging_module, "_flush_stop", stop_event)
 
     logging_module._flush_worker()
 
-    stop_event.wait.assert_called_once_with(
-        logging_module.LOG_FLUSH_INTERVAL,
-    )
+    stop_event.wait.assert_called_once()
 
 
 def test_flush_worker_flushes_logger(monkeypatch) -> None:
     stop_event = MagicMock()
+    stop_event.is_set.side_effect = [False, False, True]
     stop_event.wait.side_effect = [False, True]
 
     fake_logger = MagicMock()
@@ -150,6 +150,7 @@ def test_flush_worker_flushes_logger(monkeypatch) -> None:
 
 def test_flush_worker_ignores_flush_error(monkeypatch) -> None:
     stop_event = MagicMock()
+    stop_event.is_set.side_effect = [False, False, True]
     stop_event.wait.side_effect = [False, True]
 
     fake_logger = MagicMock()

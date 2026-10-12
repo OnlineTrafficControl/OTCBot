@@ -54,13 +54,6 @@ jobs:
             --cov-report=term-missing \
             --cov-fail-under=80
 
-      - name: Rename coverage report
-        if: always()
-        run: |
-          if [ -f coverage.xml ]; then
-            mv coverage.xml coverage.xml
-          fi
-
       - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@v7

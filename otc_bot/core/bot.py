@@ -126,6 +126,8 @@ class OTCBot(discord.Bot):
         if not self._ready_once:
             self._ready_once = True
 
+            print("Hello World!\n\n    :3")
+
             log_notice(
                 f"OTCBot is ready as {self.user} "
                 f"(ID: {self.user.id}).",

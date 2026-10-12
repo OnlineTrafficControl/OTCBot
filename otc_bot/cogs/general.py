@@ -7,6 +7,7 @@
 # cogs.general #
 
 
+import re
 import time
 
 import discord
@@ -21,12 +22,70 @@ from otc_bot.core.logging import (
 )
 
 
+GREETINGS: tuple[str, ...] = (
+"hi",
+"hello",
+"hey",
+"hiya",
+"heya",
+"howdy",
+"hallo",
+"bonjour",
+)
+
+GREETING_PATTERN = re.compile(
+r"\b(?:"
++ "|".join(
+re.escape(greeting)
+for greeting in GREETINGS
+)
++ r")\b",
+re.IGNORECASE,
+)
+
+
 class General(commands.Cog):
 
 
     def __init__(self, bot: discord.Bot) -> None:
 
         self.bot = bot
+
+
+    @commands.Cog.listener()
+    async def on_message(
+            self,
+            message: discord.Message,
+        ) -> None:
+
+        if message.author.bot:
+            return
+
+        if not message.content:
+            return
+
+        if not GREETING_PATTERN.search(message.content):
+            return
+
+        try:
+            await message.add_reaction("👋")
+
+        except discord.Forbidden:
+            log_warning(
+                f"Unable to react to message {message.id} "
+                f"in #{message.channel} "
+                f"(ID: {message.channel.id}): "
+                f"missing permissions.",
+                scope="General",
+            )
+
+        except discord.HTTPException:
+            log_exception(
+                f"Failed to react to greeting message "
+                f"{message.id} in #{message.channel} "
+                f"(ID: {message.channel.id}).",
+                scope="General",
+            )
 
 
     @discord.slash_command(

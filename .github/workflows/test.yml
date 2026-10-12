@@ -46,7 +46,6 @@ jobs:
           TICKET_CATEGORY_NAME: ${{ vars.TICKET_CATEGORY_NAME }}
 
           OTC_BOT_TOKEN: ${{ secrets.OTC_BOT_TOKEN }}
-          WAIFLY_UPLOAD_KEY: ${{ secrets.WAIFLY_UPLOAD_KEY }}
         run: |
           python -m pytest tests/ \
             --cov=otc_bot \

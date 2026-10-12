@@ -8,18 +8,32 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: otc-bot-deployment
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
-      - name: Create deployment archive
+      - name: Prepare deployment files
         run: |
-          zip -r otc-bot.zip otc_bot requirements.txt \
-            -x "*/__pycache__/*" "*.pyc"
+          mkdir -p deploy
+
+          cp -r otc_bot deploy/
+          cp -r bin deploy/
+          cp requirements.txt LICENSE Makefile OTC_Bot.py TODO.md deploy/
+
+          find deploy -type d -name "__pycache__" \
+            -prune -exec rm -rf {} +
+
+          find deploy -type f -name "*.pyc" -delete
+
+          find deploy -maxdepth 2 -type f -print
 
       - name: Upload OTCBot over SFTP
         uses: wlixcc/SFTP-Deploy-Action@v1.2.6
@@ -28,6 +42,7 @@ jobs:
           port: ${{ secrets.WAIFLY_SFTP_PORT }}
           username: ${{ secrets.WAIFLY_SFTP_USERNAME }}
           password: ${{ secrets.WAIFLY_SFTP_PASSWORD }}
-          local_path: "./otc-bot.zip"
+          local_path: "./deploy/*"
           remote_path: "/"
           sftp_only: true
+          delete_remote_files: false

@@ -1,6 +1,7 @@
 # IGNORED FILES #
 .env
 .coverage
+*.jar-log
 
 # IGNORED FOLDERS #
 .vscode

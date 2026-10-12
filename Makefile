@@ -15,9 +15,15 @@ export PYTHONPATH := $(CURDIR)
 
 .PHONY: setup tests clean-tests
 
+.DEFAULT_GOAL := run
+
 ## Installation
 setup:
 	source $(SETUP)
+
+## Run bot
+run:
+	$(PYTHON) -m otc_bot
 
 ## Tests with coverage
 tests:

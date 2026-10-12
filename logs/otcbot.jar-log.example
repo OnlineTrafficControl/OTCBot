@@ -1,0 +1,16 @@
+════════════════════════════════════════════════════════════════════════════
+jar-log v2  run=a5392f5a-3eeb-47cd-a392-7d8b73d114b6  start=2026-10-12 12:22:19,729334
+application="OTCBot"
+────────────────────────────────────────────────────────────────────────────
+seq    timestamp                     level     scope        message
+────────────────────────────────────────────────────────────────────────────
+00000  2026-10-12 12:22:19,729486     INFO       Bot           Starting OTCBot.
+00001  2026-10-12 12:22:23,640171     NOTICE     Bot           OTCBot is ready as OTC_Bot#3406 (ID: 1519453590949990550).
+00002  2026-10-12 12:22:23,640195     INFO       Bot           Connected to server: test server (ID: 1304966976048988180).
+00003  2026-10-12 12:22:23,640203     INFO       Bot           Connected to server: Online Traffic Control (ID: 1426009085991588002).
+00004  2026-10-12 12:22:29,790685     NOTICE     Bot           OTCBot shutdown started.
+00005  2026-10-12 12:22:29,791200     INFO       Bot           Discord client closed successfully.
+────────────────────────────────────────────────────────────────────────────
+run=a5392f5a-3eeb-47cd-a392-7d8b73d114b6  end=2026-10-12 12:22:29,791704  duration_ms=10062.37
+result=SUCCESS  errors=0  warnings=0  criticals=0
+════════════════════════════════════════════════════════════════════════════

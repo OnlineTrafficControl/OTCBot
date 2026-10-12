@@ -1,0 +1,6 @@
+# IGNORED FILES #
+.env
+
+# IGNORED FOLDERS #
+.vscode
+.idea

@@ -14,20 +14,20 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Create deployment archive
         run: |
           zip -r otc-bot.zip otc_bot requirements.txt \
             -x "*/__pycache__/*" "*.pyc"
 
-      - name: Upload and restart OTCBot
-        uses: rexlManu/pterodactyl-upload-action@v2.5
+      - name: Upload OTCBot over SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
         with:
-          panel-host: https://panel.waifly.com
-          api-key: ${{ secrets.WAIFLY_UPLOAD_KEY }}
-          server-id: ${{ secrets.WAIFLY_SERVER_ID }}
-          source: otc-bot.zip
-          target: ./
-          decompress-target: true
-          restart: true
+          server: ${{ secrets.WAIFLY_SFTP_HOST }}
+          port: ${{ secrets.WAIFLY_SFTP_PORT }}
+          username: ${{ secrets.WAIFLY_SFTP_USERNAME }}
+          password: ${{ secrets.WAIFLY_SFTP_PASSWORD }}
+          local_path: "./otc-bot.zip"
+          remote_path: "/"
+          sftp_only: true

@@ -4,13 +4,14 @@
 ## ------------ ##
 ##################
 
+# __main__ #
+
 
 from discord import LoginFailure
 
 from otc_bot.core.bot import create_bot
+from otc_bot.core.constants import BOT_TOKEN
 from otc_bot.core.logging import log_critical, log_info, log_notice, log_exception, close_logger
-from otc_bot.services.get_env import get_env
-
 
 
 def main() -> None:
@@ -19,14 +20,13 @@ def main() -> None:
 
     try:
         bot = create_bot()
-        token = get_env("OTC_BOT_TOKEN")
 
         log_info(
             "Starting OTCBot.",
             scope="Bot",
         )
 
-        bot.run(token)
+        bot.run(BOT_TOKEN)
 
     except LoginFailure:
         log_critical(

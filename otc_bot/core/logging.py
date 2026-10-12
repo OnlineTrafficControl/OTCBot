@@ -4,9 +4,11 @@
 ## ------------ ##
 ##################
 
+# core.logging #
+
 
 from pathlib import Path
-from threading import Lock
+from threading import Lock, Event, Thread
 from traceback import format_exc
 from typing import Any
 
@@ -20,19 +22,15 @@ LOG_METADATA: dict[str, Any] = {
     "application": "OTCBot",
 }
 
+LOG_FLUSH_INTERVAL: float = 10.0
+
 _logger: Log | None = None
 _logger_lock = Lock()
+_flush_stop = Event()
+_flush_thread: Thread | None = None
 
 
 def get_logger() -> Log:
-    """
-        Get the shared OTCBot logger.
-
-        Returns
-        ----------
-        Log
-            The shared Jar-Log instance
-    """
 
     global _logger
 
@@ -45,6 +43,14 @@ def get_logger() -> Log:
                 metadata=LOG_METADATA,
             )
 
+            _flush_stop.clear()
+            _flush_thread = Thread(
+                target=_flush_worker,
+                name="OTCBot-LogFlusher",
+                daemon=True,
+            )
+            _flush_thread.start()
+
         return _logger
 
 
@@ -53,9 +59,6 @@ def log_debug(
         *,
         scope: str = "",
     ) -> None:
-    """
-        Log a debug message.
-    """
 
     get_logger().log(
         LogLevel.DEBUG,
@@ -69,9 +72,6 @@ def log_info(
         *,
         scope: str = "",
     ) -> None:
-    """
-        Log an informational message.
-    """
 
     get_logger().log(
         LogLevel.INFO,
@@ -85,9 +85,6 @@ def log_notice(
         *,
         scope: str = "",
     ) -> None:
-    """
-        Log a notice message.
-    """
 
     get_logger().log(
         LogLevel.NOTICE,
@@ -101,9 +98,6 @@ def log_warning(
         *,
         scope: str = "",
     ) -> None:
-    """
-        Log a warning message.
-    """
 
     get_logger().log(
         LogLevel.WARNING,
@@ -117,9 +111,6 @@ def log_error(
         *,
         scope: str = "",
     ) -> None:
-    """
-        Log an error message.
-    """
 
     get_logger().log(
         LogLevel.ERROR,
@@ -133,9 +124,6 @@ def log_critical(
         *,
         scope: str = "",
     ) -> None:
-    """
-        Log a critical message.
-    """
 
     get_logger().log(
         LogLevel.CRITICAL,
@@ -149,11 +137,6 @@ def log_exception(
         *,
         scope: str = "",
     ) -> None:
-    """
-        Log an error with the current exception traceback.
-
-        Must be called inside an exception handler.
-    """
 
     traceback = format_exc()
 
@@ -166,9 +149,6 @@ def log_exception(
 def log_comment(
         message: str,
     ) -> None:
-    """
-        Add a comment to the log file.
-    """
 
     get_logger().comment(message)
 
@@ -177,15 +157,33 @@ def close_logger(
         *,
         result: str = "SUCCESS",
     ) -> None:
-    """
-        Close the shared logger and finalize its log file.
-    """
 
     global _logger
+    global _flush_thread
+
+    _flush_stop.set()
+
+    if _flush_thread is not None:
+        _flush_thread.join(timeout=LOG_FLUSH_INTERVAL + 1)
+        _flush_thread = None
 
     with _logger_lock:
         if _logger is None:
             return
 
-        _logger.close(result=result)
-        _logger = None
+        try:
+            _logger.flush()
+        finally:
+            _logger.close(result=result)
+
+
+def _flush_worker() -> None:
+    while not _flush_stop.wait(LOG_FLUSH_INTERVAL):
+        with _logger_lock:
+            if _logger is None:
+                continue
+
+            try:
+                _logger.flush()
+            except Exception:
+                pass

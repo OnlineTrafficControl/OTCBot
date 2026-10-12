@@ -4,12 +4,15 @@
 ## ------------ ##
 ##################
 
+# core.constants #
+
 
 from dotenv import load_dotenv
 from enum import Enum, StrEnum
 
 from otc_bot.core.models import Server, Role, Owner, Category, Seconds
-from otc_bot.services.get_env import get_env_id, get_env
+from otc_bot.services.env import get_env_id, get_env
+
 
 load_dotenv()
 
@@ -71,20 +74,19 @@ class AirportPositions(StrEnum):
     DEPARTURE = "DEP"
     APPROACH = "APP"
     CENTER = "CTR"
-    CTAF = "CTAF"
 
 
-ALL_AIRPORT_POSITIONS = (
-    AirportPositions.GROUND,
-    AirportPositions.TOWER,
-    AirportPositions.DEPARTURE,
-    AirportPositions.APPROACH,
-    AirportPositions.CENTER,
-    AirportPositions.CTAF,
-)
+ALL_AIRPORT_POSITIONS = tuple(AirportPositions)
+
+BOT_TOKEN = get_env("OTC_BOT_TOKEN")
 
 AIRPORT_CATEGORY_NAME_FORMAT: str = "{airport_code}"
 AIRPORT_VOICE_CHANNEL_NAME_FORMAT: str = "{airport_code} - {position}"
+
+SERVER_IDS: tuple[int, ...] = tuple(
+    server.value.id
+    for server in Servers
+)
 
 INACTIVE_CHANNEL_CHECK_INTERVAL: Seconds = Seconds(300)
 INACTIVE_CHANNEL_DELETION_THRESHOLD: Seconds = Seconds(7200)

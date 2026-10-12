@@ -4,13 +4,16 @@
 ## ------------ ##
 ##################
 
+# core.bot #
+
 
 from pathlib import Path
 
 import discord
 
+from otc_bot.core.constants import SERVER_IDS
 from otc_bot.core.logging import (
-    close_logger,
+    log_error,
     log_exception,
     log_info,
     log_notice,
@@ -25,9 +28,12 @@ class OTCBot(discord.Bot):
 
 
     def __init__(self) -> None:
+        log_info(
+            "Creating bot.",
+            scope="Bot",
+        )
 
         intents = discord.Intents.default()
-
         intents.guilds = True
         intents.guild_messages = True
         intents.voice_states = True
@@ -37,10 +43,30 @@ class OTCBot(discord.Bot):
 
         self._ready_once = False
         self._shutdown_started = False
+        self._cogs_loaded = False
+        self._commands_synced = False
+
+        log_info(
+            "Bot created successfully.",
+            scope="Bot",
+        )
 
 
-    async def setup_hook(self) -> None:
+    async def on_connect(self) -> None:
+        if not self._cogs_loaded:
+            await self.load_cogs()
 
+        if not self._commands_synced:
+            await self.sync_commands(force=True)
+            self._commands_synced = True
+
+            log_info(
+                "Application commands synchronized.",
+                scope="Bot",
+            )
+
+
+    async def load_cogs(self) -> None:
         log_info(
             "Loading Cogs.",
             scope="Bot",
@@ -53,12 +79,28 @@ class OTCBot(discord.Bot):
 
                 extension = f"otc_bot.cogs.{path.stem}"
 
-                await self.load_extension(extension)
+                self.load_extension(extension)
 
                 log_info(
                     f"Loaded extension: {extension}",
                     scope="Bot",
                 )
+
+            self._cogs_loaded = True
+
+            log_info(
+                f"Configured server IDs: {SERVER_IDS}",
+                scope="Bot",
+            )
+
+            log_info(
+                "Loaded application commands: "
+                + ", ".join(
+                    command.name
+                    for command in self.application_commands
+                ),
+                scope="Bot",
+            )
 
             log_info(
                 "All Cogs loaded successfully.",
@@ -74,7 +116,6 @@ class OTCBot(discord.Bot):
 
 
     async def on_ready(self) -> None:
-
         if self.user is None:
             log_warning(
                 "Bot is ready but its user information is unavailable.",
@@ -86,17 +127,15 @@ class OTCBot(discord.Bot):
             self._ready_once = True
 
             log_notice(
-                f"OTCBot is ready as {self.user} (ID: {self.user.id}).",
+                f"OTCBot is ready as {self.user} "
+                f"(ID: {self.user.id}).",
                 scope="Bot",
             )
 
             for guild in self.guilds:
-                log_debug_message = (
-                    f"Connected to server: {guild.name} (ID: {guild.id})."
-                )
-
                 log_info(
-                    log_debug_message,
+                    f"Connected to server: {guild.name} "
+                    f"(ID: {guild.id}).",
                     scope="Bot",
                 )
 
@@ -109,7 +148,6 @@ class OTCBot(discord.Bot):
 
 
     async def close(self) -> None:
-
         if self._shutdown_started:
             return
 
@@ -136,6 +174,61 @@ class OTCBot(discord.Bot):
             raise
 
 
-def create_bot() -> OTCBot:
+    async def on_application_command_error(
+            self,
+            ctx: discord.ApplicationContext,
+            error: discord.ApplicationCommandError,
+        ) -> None:
+        command_name = (
+            ctx.command.qualified_name
+            if ctx.command is not None
+            else "unknown"
+        )
 
+        original_error = getattr(error, "original", error)
+
+        log_error(
+            f"Application command '/{command_name}' failed: "
+            f"{type(original_error).__name__}: {original_error}",
+            scope="Commands",
+        )
+
+        import traceback
+
+        formatted_traceback = "".join(
+            traceback.format_exception(
+                type(original_error),
+                original_error,
+                original_error.__traceback__,
+            )
+        )
+
+        log_error(
+            f"Command traceback:\n{formatted_traceback}",
+            scope="Commands",
+        )
+
+        try:
+            if ctx.interaction.response.is_done():
+                await ctx.followup.send(
+                    "The command failed unexpectedly. "
+                    "The error has been logged.",
+                    ephemeral=True,
+                )
+            else:
+                await ctx.respond(
+                    "The command failed unexpectedly. "
+                    "The error has been logged.",
+                    ephemeral=True,
+                )
+
+        except discord.HTTPException as response_error:
+            log_error(
+                "Could not send an error response for "
+                f"'/{command_name}': {response_error}",
+                scope="Commands",
+            )
+
+
+def create_bot() -> OTCBot:
     return OTCBot()

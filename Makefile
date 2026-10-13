@@ -13,7 +13,7 @@ PYTEST := $(VENV)/bin/pytest
 
 export PYTHONPATH := $(CURDIR)
 
-.PHONY: setup tests clean-tests
+.PHONY: setup run tests clean-tests clean-logs
 
 .DEFAULT_GOAL := run
 
@@ -32,3 +32,7 @@ tests:
 ## Remove generated test reports
 clean-tests:
 	rm -rf .coverage htmlcov .pytest_cache
+
+## Remove generated test reports
+clean-logs:
+	rm -f logs/*.jar-log

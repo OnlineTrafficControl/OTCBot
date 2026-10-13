@@ -92,3 +92,14 @@ INACTIVE_CHANNEL_CHECK_INTERVAL: Seconds = Seconds(300)
 INACTIVE_CHANNEL_DELETION_THRESHOLD: Seconds = Seconds(7200)
 
 TICKET_FIRST_MESSAGE: str = "Please describe your issue below and a member of the mod team will respond asap!"
+
+GREETINGS: tuple[str, ...] = (
+    "hi",
+    "hello",
+    "hey",
+    "hiya",
+    "heya",
+    "howdy",
+    "hallo",
+    "bonjour",
+)

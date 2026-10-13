@@ -13,7 +13,10 @@ import time
 import discord
 from discord.ext import commands
 
-from otc_bot.core.constants import SERVER_IDS
+from otc_bot.core.constants import (
+    SERVER_IDS,
+    GREETINGS,
+)
 from otc_bot.core.logging import (
     log_exception,
     log_info,
@@ -21,17 +24,6 @@ from otc_bot.core.logging import (
     log_warning,
 )
 
-
-GREETINGS: tuple[str, ...] = (
-"hi",
-"hello",
-"hey",
-"hiya",
-"heya",
-"howdy",
-"hallo",
-"bonjour",
-)
 
 GREETING_PATTERN = re.compile(
 r"\b(?:"

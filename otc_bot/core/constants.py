@@ -7,14 +7,10 @@
 # core.constants #
 
 
-from dotenv import load_dotenv
 from enum import Enum, StrEnum
 
 from otc_bot.core.models import Server, Role, Owner, Category, Seconds, Channel
 from otc_bot.services.env import get_env_id, get_env
-
-
-load_dotenv()
 
 
 class Servers(Enum):

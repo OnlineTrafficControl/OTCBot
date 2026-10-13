@@ -39,7 +39,7 @@ class Channel:
     id: int
     name: str
     category: Optional[Category]
-    type: Literal["TEXT", "VOICE"]
+    type: Literal["TEXT", "VOICE", "ANNOUNCEMENT"]
 
 
 @dataclass(frozen=True, slots=True)

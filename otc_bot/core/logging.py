@@ -91,13 +91,29 @@ def _rotate_logger() -> None:
 
     global _logger
 
+    old_run_id = None
+
     if _logger is not None:
+        old_run_id = _logger.run_id
+
         try:
+            _logger.info(
+                f"Log rotation started. "
+                f"Run ID: {old_run_id} -> pending."
+            )
             _logger.flush()
         finally:
             _logger.close(result="SUCCESS")
 
     _logger = _create_logger()
+
+    new_run_id = _logger.run_id
+
+    _logger.info(
+        f"Log rotation completed. "
+        f"Previous run ID: {old_run_id} -> "
+        f"Current run ID: {new_run_id}."
+    )
 
     _cleanup_old_logs()
 

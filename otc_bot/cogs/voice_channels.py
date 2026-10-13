@@ -14,6 +14,7 @@ from otc_bot.core.constants import (
     SERVER_IDS,
     ALL_AIRPORT_POSITIONS,
     ModRoles,
+    Channels,
 )
 from otc_bot.core.logging import (
     log_exception,
@@ -119,6 +120,14 @@ class VoiceChannels(commands.Cog):
                 f"Channels:\n{channel_list}",
                 ephemeral=True,
             )
+
+            await self.announce_airport_status(
+                guild,
+                airport_code,
+                "OPEN",
+                f"Available positions: {position}.",
+            )
+
 
         except discord.Forbidden:
             log_warning(
@@ -275,6 +284,15 @@ class VoiceChannels(commands.Cog):
                 ephemeral=True,
             )
 
+
+            await self.announce_airport_status(
+                guild,
+                airport_code,
+                "CLOSED",
+                f"Removed {deleted_count} voice channel(s).",
+            )
+
+
         except discord.Forbidden:
             log_warning(
                 f"Discord denied deletion of airport {airport_code}, "
@@ -311,6 +329,56 @@ class VoiceChannels(commands.Cog):
             role.id in moderator_role_ids
             for role in member.roles
         )
+
+
+    async def announce_airport_status(
+            self,
+            guild: discord.Guild,
+            airport_code: str,
+            status: str,
+            details: str | None = None,
+        ) -> None:
+
+        channel = guild.get_channel(
+            Channels.AIRPORT_STATUS.value.id,
+        )
+
+        if not isinstance(channel, discord.TextChannel):
+            log_warning(
+                "Unable to find the airport status channel "
+                f"(ID: {Channels.AIRPORT_STATUS.value.id}) "
+                f"in {guild.name} (ID: {guild.id}).",
+                scope="VoiceChannels",
+            )
+            return
+
+        message = (
+            f"**Airport status: {airport_code} — {status}**"
+        )
+
+        if details:
+            message += f"\n{details}"
+
+        try:
+            await channel.send(
+                message,
+                allowed_mentions=discord.AllowedMentions.none(),
+            )
+
+        except discord.Forbidden:
+            log_warning(
+                f"Permission denied while announcing "
+                f"{airport_code} status in "
+                f"#{channel.name} (ID: {channel.id}).",
+                scope="VoiceChannels",
+            )
+
+        except discord.HTTPException:
+            log_exception(
+                f"Failed to announce {airport_code} status "
+                f"in #{channel.name} (ID: {channel.id}).",
+                scope="VoiceChannels",
+            )
 
 
 def setup(bot: discord.Bot) -> None:

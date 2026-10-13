@@ -29,7 +29,7 @@ def console_input(bot) -> None:
         try:
             command = input()
 
-        except EOFError:
+        except (EOFError, OSError):
             return
 
         if command.strip().lower() == "exit":

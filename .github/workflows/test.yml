@@ -31,20 +31,18 @@ jobs:
             python -m pip install -r requirements.txt
           fi
 
+      - name: Export GitHub variables
+        env:
+          VARS_JSON: ${{ toJSON(vars) }}
+        run: |
+          echo "$VARS_JSON" | jq -r '
+            to_entries[] |
+            select(.value != null) |
+            "\(.key)=\(.value)"
+          ' >> "$GITHUB_ENV"
+
       - name: Test with pytest
         env:
-          ADMIN_ROLE_ID: ${{ vars.ADMIN_ROLE_ID }}
-          CO_OWNER_ROLE_ID: ${{ vars.CO_OWNER_ROLE_ID }}
-          EXEC_ADMIN_ROLE_ID: ${{ vars.EXEC_ADMIN_ROLE_ID }}
-          EXEC_MOD_ROLE_ID: ${{ vars.EXEC_MOD_ROLE_ID }}
-          MOD_ROLE_ID: ${{ vars.MOD_ROLE_ID }}
-          OTC_SERVER_ID: ${{ vars.OTC_SERVER_ID }}
-          OWNER_ROLE_ID: ${{ vars.OWNER_ROLE_ID }}
-          OWNER_USER_ID: ${{ vars.OWNER_USER_ID }}
-          TEST_SERVER_ID: ${{ vars.TEST_SERVER_ID }}
-          TICKET_CATEGORY_ID: ${{ vars.TICKET_CATEGORY_ID }}
-          TICKET_CATEGORY_NAME: ${{ vars.TICKET_CATEGORY_NAME }}
-
           OTC_BOT_TOKEN: ${{ secrets.OTC_BOT_TOKEN }}
         run: |
           python -m pytest tests/ \

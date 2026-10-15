@@ -36,6 +36,19 @@ _flush_stop = Event()
 _flush_thread: Thread | None = None
 
 
+def get_latest_log() -> Path | None:
+
+    log_files = list(LOG_DIRECTORY.rglob("*.jar-log"))
+
+    if not log_files:
+        return None
+
+    return max(
+        log_files,
+        key=lambda path: path.stat().st_mtime,
+    )
+
+
 def _utc_now() -> datetime:
 
     return datetime.now(timezone.utc)
@@ -265,6 +278,12 @@ def close_logger(
         finally:
             _logger.close(result=result)
             _logger = None
+
+
+def flush_logger(
+    ) -> None:
+
+    get_logger().flush()
 
 
 def _flush_worker() -> None:

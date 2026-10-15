@@ -21,7 +21,8 @@ from otc_bot.core.logging import (
     log_info,
     log_notice,
     log_warning,
-    LOG_DIRECTORY,
+    flush_logger,
+    get_latest_log,
 )
 
 
@@ -29,19 +30,6 @@ LOG_HEAD_LINES = 20
 LOG_TAIL_LINES = 20
 LOG_MAX_CHARS = 1800
 LOG_MAX_LINE_CHARS = 250
-
-
-def _get_latest_log() -> Path | None:
-
-    log_files = list(LOG_DIRECTORY.rglob("*.jar-log"))
-
-    if not log_files:
-        return None
-
-    return max(
-        log_files,
-        key=lambda path: path.stat().st_mtime,
-    )
 
 
 def _format_log_excerpt(log_path: Path) -> str:
@@ -261,12 +249,12 @@ class ModOnly(commands.Cog):
 
         if not moderator_role_ids.intersection(member_role_ids):
             await ctx.respond(
-                "You need a moderator role to use this command.",
+                "You need a moderator or engineer role to use this command.",
                 ephemeral=True,
             )
             return
 
-        log_path = _get_latest_log()
+        log_path = get_latest_log()
 
         if log_path is None:
             await ctx.respond(
@@ -302,6 +290,70 @@ class ModOnly(commands.Cog):
         await ctx.respond(
             f"Latest log: `{log_path.name}`\n"
             f"```text\n{excerpt}\n```",
+            ephemeral=True,
+        )
+
+    @discord.slash_command(
+        name="log-flush",
+        description="Immediately flushes buffered bot logs.",
+        guild_ids=list(SERVER_IDS),
+    )
+    async def log_flush(
+            self,
+            ctx: discord.ApplicationContext,
+    ) -> None:
+
+        guild = ctx.guild
+
+        if guild is None:
+            await ctx.respond(
+                "This command can only be used in a server.",
+                ephemeral=True,
+            )
+            return
+
+        moderator_role_ids = {
+            role.value.id
+            for role in list(ModRoles) + list(EngineerRoles)
+        }
+
+        member_role_ids = {
+            role.id
+            for role in ctx.author.roles
+        }
+
+        if not moderator_role_ids.intersection(member_role_ids):
+            await ctx.respond(
+                "You need a moderator or engineer role to use this command.",
+                ephemeral=True,
+            )
+            return
+
+        try:
+            flush_logger()
+
+        except Exception:
+            log_exception(
+                f"Failed to flush logs at the request of {ctx.author} "
+                f"(ID: {ctx.author.id}).",
+                scope="General",
+            )
+
+            await ctx.respond(
+                "Unable to flush the logs.",
+                ephemeral=True,
+            )
+            return
+
+        log_notice(
+            f"Log flush requested by {ctx.author} "
+            f"(ID: {ctx.author.id}) in {guild.name} "
+            f"(ID: {guild.id}).",
+            scope="General",
+        )
+
+        await ctx.respond(
+            "Buffered logs have been flushed.",
             ephemeral=True,
         )
 

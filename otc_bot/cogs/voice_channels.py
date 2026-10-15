@@ -14,7 +14,6 @@ from otc_bot.core.constants import (
     SERVER_IDS,
     ALL_AIRPORT_POSITIONS,
     ModRoles,
-    Channels,
 )
 from otc_bot.core.logging import (
     log_exception,
@@ -25,9 +24,11 @@ from otc_bot.services.voice_channel import (
     close_airport_channels,
     normalize_airport_code,
     open_airport_channels,
+    refresh_airport_status,
 )
 
 AIRPORT_POSITIONS = ["ALL"] + list(ALL_AIRPORT_POSITIONS)
+
 
 
 class VoiceChannels(commands.Cog):
@@ -114,18 +115,20 @@ class VoiceChannels(commands.Cog):
                 else "Reused the existing airport category."
             )
 
+            status_updated = await self.update_status(guild)
+
+            status_message = (
+                ""
+                if status_updated
+                else "\nWarning: The airport status embed could not be updated."
+            )
+
             await ctx.followup.send(
                 f"{category_message}\n"
                 f"Airport: **{airport_code}**\n"
-                f"Channels:\n{channel_list}",
+                f"Channels:\n{channel_list}"
+                f"{status_message}",
                 ephemeral=True,
-            )
-
-            await self.announce_airport_status(
-                guild,
-                airport_code,
-                "OPEN",
-                f"Available positions: {position}.",
             )
 
 
@@ -272,24 +275,24 @@ class VoiceChannels(commands.Cog):
                 scope="VoiceChannels",
             )
 
+            status_updated = await self.update_status(guild)
+
+            status_message = (
+                ""
+                if status_updated
+                else "\nWarning: The airport status embed could not be updated."
+            )
+
             await ctx.followup.send(
                 f"Closed **{deleted_count}** voice channel(s) "
                 f"for **{airport_code}**.\n"
                 + (
                     "The airport category was deleted."
                     if category_deleted
-                    else "The category was preserved because it "
-                         "still contains channels."
-                ),
+                    else "The category was preserved because it still contains channels."
+                )
+                + status_message,
                 ephemeral=True,
-            )
-
-
-            await self.announce_airport_status(
-                guild,
-                airport_code,
-                "CLOSED",
-                f"Removed {deleted_count} voice channel(s).",
             )
 
 
@@ -331,54 +334,22 @@ class VoiceChannels(commands.Cog):
         )
 
 
-    async def announce_airport_status(
+    async def update_status(
             self,
             guild: discord.Guild,
-            airport_code: str,
-            status: str,
-            details: str | None = None,
-        ) -> None:
+        ) -> bool:
 
-        channel = guild.get_channel(
-            Channels.AIRPORT_STATUS.value.id,
-        )
+        try:
+            await refresh_airport_status(guild)
+            return True
 
-        if not isinstance(channel, discord.TextChannel):
-            log_warning(
-                "Unable to find the airport status channel "
-                f"(ID: {Channels.AIRPORT_STATUS.value.id}) "
+        except Exception:
+            log_exception(
+                f"Failed to refresh the airport status embed "
                 f"in {guild.name} (ID: {guild.id}).",
                 scope="VoiceChannels",
             )
-            return
-
-        message = (
-            f"**Airport status: {airport_code} — {status}**"
-        )
-
-        if details:
-            message += f"\n{details}"
-
-        try:
-            await channel.send(
-                message,
-                allowed_mentions=discord.AllowedMentions.none(),
-            )
-
-        except discord.Forbidden:
-            log_warning(
-                f"Permission denied while announcing "
-                f"{airport_code} status in "
-                f"#{channel.name} (ID: {channel.id}).",
-                scope="VoiceChannels",
-            )
-
-        except discord.HTTPException:
-            log_exception(
-                f"Failed to announce {airport_code} status "
-                f"in #{channel.name} (ID: {channel.id}).",
-                scope="VoiceChannels",
-            )
+            return False
 
 
 def setup(bot: discord.Bot) -> None:

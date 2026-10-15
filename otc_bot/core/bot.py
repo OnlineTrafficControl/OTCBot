@@ -7,6 +7,7 @@
 # core.bot #
 
 
+import asyncio
 from pathlib import Path
 
 import discord
@@ -18,7 +19,9 @@ from otc_bot.core.logging import (
     log_info,
     log_notice,
     log_warning,
+    get_latest_log,
 )
+from otc_bot.services.voice_channel import refresh_airport_status
 
 
 COGS_DIRECTORY = Path(__file__).resolve().parent.parent / "cogs"
@@ -45,6 +48,7 @@ class OTCBot(discord.Bot):
         self._shutdown_started = False
         self._cogs_loaded = False
         self._commands_synced = False
+        self._ready_event = asyncio.Event()
 
         log_info(
             "Bot created successfully.",
@@ -123,9 +127,12 @@ class OTCBot(discord.Bot):
             )
             return
 
+        self._ready_event.set()
+
         if not self._ready_once:
             self._ready_once = True
 
+            print(f"Log path: {get_latest_log()}\n")
             print("Hello World!\n\n    :3")
 
             log_notice(
@@ -140,6 +147,16 @@ class OTCBot(discord.Bot):
                     f"(ID: {guild.id}).",
                     scope="Bot",
                 )
+
+                try:
+                    await refresh_airport_status(guild)
+
+                except Exception:
+                    log_exception(
+                        f"Failed to initialize airport status for "
+                        f"{guild.name} (ID: {guild.id}).",
+                        scope="Bot",
+                    )
 
             return
 

@@ -10,7 +10,7 @@
 from enum import Enum, StrEnum
 
 from otc_bot.core.models import Server, Role, Owner, Category, Seconds, Channel
-from otc_bot.services.env import get_env_id, get_env
+from otc_bot.core.env import get_env_id, get_env
 
 
 class Servers(Enum):

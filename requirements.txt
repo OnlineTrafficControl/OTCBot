@@ -1,4 +1,12 @@
+pip==26.3
 pytest==9.1.1
 pytest-asyncio==1.4.0
 pytest-cov==7.1.0
-jardiscordengine==0.3.1
+py-cord==2.8.1
+dotenv==0.9.9
+jarbin-toolkit-error==1.0.1.2
+jarbin-toolkit-time==1.0.0.2
+jarbin-toolkit-config==1.0.0.2
+jarbin-toolkit-log==1.0.1.2
+jarbin-toolkit-console==1.0.0.2
+jardiscordengine==0.3.2

@@ -4,16 +4,18 @@
 ## ------------ ##
 ##################
 
-VENV := .venv
-SETUP := bin/setup_linux.sh
+SHELL   :=  /bin/bash
 
-PYTHON := $(VENV)/bin/python
-PIP := $(VENV)/bin/pip
-PYTEST := $(VENV)/bin/pytest
+VENV    :=  .venv
+SETUP   :=  bin/setup_linux.sh
 
-export PYTHONPATH := $(CURDIR)
+PYTHON  :=  $(VENV)/bin/python
+PIP     :=  $(VENV)/bin/pip
+PYTEST  :=  $(VENV)/bin/pytest
 
-.PHONY: setup run tests clean-tests clean-logs
+export PYTHONPATH   :=  $(CURDIR)
+
+.PHONY: setup run tests clean-tests clean-logs clean
 
 .DEFAULT_GOAL := run
 
@@ -23,7 +25,7 @@ setup:
 
 ## Run bot
 run:
-	$(PYTHON) -m otc_bot
+	$(PYTHON) -m otc_bot.main
 
 ## Tests with coverage
 tests:
@@ -35,4 +37,7 @@ clean-tests:
 
 ## Remove generated test reports
 clean-logs:
-	rm -f logs/*.jar-log
+	rm -f logs/*
+
+## Global cleaning
+clean:  clean-tests clean-logs

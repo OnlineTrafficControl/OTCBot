@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock, call
 import pytest
 from discord import LoginFailure
 
-from otc_bot import __main__ as main_module
+from otc_bot import main as main_module
 
 
 class FakeBot:

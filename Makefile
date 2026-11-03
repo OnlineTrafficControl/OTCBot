@@ -25,7 +25,7 @@ setup:
 
 ## Run bot
 run:
-	$(PYTHON) -m otc_bot
+	$(PYTHON) otc_bot/main.py
 
 ## Tests with coverage
 tests:

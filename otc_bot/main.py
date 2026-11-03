@@ -18,7 +18,8 @@ async def main() -> None:
     )
 
     bot = JDE.Bots.JDEBot(
-        activity=JDE.Entities.JDEEntityActivityGame("Microsoft Flight Simulator 2024")
+        activity=JDE.Entities.JDEEntityActivityGame("Microsoft Flight Simulator 2024"),
+        no_sync=("MESSAGES")
     )
 
     log_info(

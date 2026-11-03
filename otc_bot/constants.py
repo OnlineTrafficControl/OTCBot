@@ -8,7 +8,7 @@ AIRPORT_ICAO_PATTERN: Final[re.Pattern[str]] = re.compile(
 )
 
 AIRPORT_CHANNEL_PATTERN: Final[re.Pattern[str]] = re.compile(
-    r"^([A-Z0-9]{4})-(GND|TWR|DEP|APP|CTR)$",
+    r"^([A-Z0-9]{4})\s+-\s+(GND|TWR|DEP|APP|CTR)$",
     re.IGNORECASE,
 )
 

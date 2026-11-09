@@ -107,6 +107,9 @@ async def open_airport(
             f"Created voice channel '{channel_name}' (ID: {channel.id}).",
         )
 
+    OPEN_AIRPORTS.pop(key)
+    OPEN_AIRPORTS[key] = resources
+
     return created_channels, existing_channels
 
 async def close_airport(

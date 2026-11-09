@@ -1,9 +1,11 @@
 # IGNORED FILES #
 .env
 .coverage
-*.jar-log
 
 # IGNORED FOLDERS #
-.vscode
-.idea
-__pycache__
+.vscode/
+.idea/
+__pycache__/
+.jde-log/
+.jde-state/
+logs/

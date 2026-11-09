@@ -239,3 +239,29 @@ def remove_tracked_airport(
 
     if not resources.channels and resources.category is None:
         OPEN_AIRPORTS.pop(key, None)
+
+async def update_bot_presence(
+    jde_bot: JDE.Bots.JDEBot,
+) -> None:
+    latest_airport = next(
+        (
+            resources
+            for resources in reversed(tuple(OPEN_AIRPORTS.values()))
+            if resources.category is not None or resources.channels
+        ),
+        None,
+    )
+
+    if latest_airport is None:
+        await jde_bot.change_presence(
+            activity=JDE.Entities.JDEEntityActivityGame("Taxiing..."),
+            status=JDE.Entities.JDEStatus.IDLE,
+        )
+        return
+
+    await jde_bot.change_presence(
+        activity=JDE.Entities.JDEEntityActivityGame(
+            f"Flying at {latest_airport.icao}"
+        ),
+        status=JDE.Entities.JDEStatus.ONLINE,
+    )

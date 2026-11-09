@@ -8,7 +8,10 @@ from otc_bot.commands.commands import register_commands
 from otc_bot.commands.terminal_commands import register_terminal_commands
 from otc_bot.constants import BOT_NAME
 from otc_bot.services.generic_helpers import log_error, log_info, move_logs
-from otc_bot.services.guild_helpers import load_existing_airport_resources
+from otc_bot.services.guild_helpers import (
+    load_existing_airport_resources,
+    update_bot_presence,
+)
 
 
 async def main() -> None:
@@ -18,8 +21,9 @@ async def main() -> None:
     )
 
     bot = JDE.Bots.JDEBot(
-        activity=JDE.Entities.JDEEntityActivityGame("Microsoft Flight Simulator 2024"),
-        no_sync=("MESSAGES")
+        activity=JDE.Entities.JDEEntityActivityGame("Bot starting..."),
+        status=JDE.Entities.JDEStatus.IDLE,
+        no_sync=("MESSAGES",),
     )
 
     log_info(
@@ -34,7 +38,10 @@ async def main() -> None:
 
     async def on_ready() -> None:
         try:
+            await bot.sync_commands()
+
             load_existing_airport_resources(bot)
+            await update_bot_presence(bot)
 
         except Exception as error:
             log_error(

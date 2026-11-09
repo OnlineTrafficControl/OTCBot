@@ -2,7 +2,7 @@ import jardiscordengine as JDE
 
 from otc_bot.constants import ALL_POSITION
 from otc_bot.services.generic_helpers import log_error, normalize_icao
-from otc_bot.services.guild_helpers import get_guild_airport_codes
+from otc_bot.services.guild_helpers import get_guild_airport_codes, update_bot_presence
 from otc_bot.services.services import close_airport, force_close_airport, open_airport
 
 
@@ -69,6 +69,8 @@ async def command_open(
             ephemeral=True,
         )
         return
+
+    await update_bot_presence(jde_bot)
 
     response_lines = [
         f"**Airport {icao}**",
@@ -157,6 +159,8 @@ async def command_close(
             ephemeral=True,
         )
         return
+
+    await update_bot_presence(jde_bot)
 
     if deleted_channels:
         deleted_channel_list = "\n".join(
@@ -292,6 +296,8 @@ async def command_force_close(
                     response_lines.append(
                         "- No resources needed to be deleted."
                     )
+
+            await update_bot_presence(jde_bot)
 
             response_lines.extend(
                 [

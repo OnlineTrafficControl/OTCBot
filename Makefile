@@ -15,7 +15,7 @@ PYTEST  :=  $(VENV)/bin/pytest
 
 export PYTHONPATH   :=  $(CURDIR)
 
-.PHONY: setup run tests clean-tests clean-logs clean
+.PHONY: setup run tests clean-tests clean-logs clean-folders clean
 
 .DEFAULT_GOAL := run
 
@@ -39,5 +39,9 @@ clean-tests:
 clean-logs:
 	rm -f logs/*
 
+## Remove other files and folders
+clean-folders:
+	find . -type d -name "__pycache__" -exec rm -rf {} +
+
 ## Global cleaning
-clean:  clean-tests clean-logs
+clean:  clean-tests clean-logs clean-folders
